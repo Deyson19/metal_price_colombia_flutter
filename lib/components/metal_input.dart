@@ -18,6 +18,9 @@ class _MetalInputState extends State<MetalInput> {
   @override
   void initState() {
     currentPrice = widget.precioVenta;
+    if (textController.value.text.isNotEmpty) {
+      isValidQuantity = true;
+    }
     super.initState();
   }
 
@@ -38,17 +41,40 @@ class _MetalInputState extends State<MetalInput> {
             const Text(
               "Ingresar Cantidad a Calcular:",
               style: TextStyle(
-                  color: Colors.amber,
+                  color: Colors.blue,
                   fontSize: 22,
                   fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(
+              height: 10,
             ),
             TextField(
               controller: textController,
               keyboardAppearance: Brightness.dark,
+              onChanged: (text) {
+                setState(() {
+                  if (text.isEmpty) {
+                    metalPrice = 0;
+                  }
+                  if (text.isNotEmpty) {
+                    try {
+                      isValidQuantity = true;
+                      metalPrice = double.parse(text);
+                      return;
+                    } on FormatException {
+                      isValidQuantity = false;
+                      _mySnackBar("No es correcta la cantidad", Colors.red);
+                    }
+                  }
+                });
+              },
               keyboardType: TextInputType.number,
               decoration: const InputDecoration(
                 border: OutlineInputBorder(),
                 labelText: 'Cantidad en gramos',
+                labelStyle: TextStyle(
+                  fontSize: 20,
+                ),
                 suffixIcon: Icon(Icons.money_off_outlined),
               ),
             ),
@@ -56,7 +82,9 @@ class _MetalInputState extends State<MetalInput> {
               height: 20,
             ),
             Center(
-              child: _btnCalcular(context),
+              child: !isValidQuantity
+                  ? textErrorCantidad()
+                  : _btnCalcular(context),
             )
           ],
         ),
@@ -64,36 +92,51 @@ class _MetalInputState extends State<MetalInput> {
     );
   }
 
-  ElevatedButton _btnCalcular(BuildContext context) {
+  Text textErrorCantidad() => const Text(
+        "Por favor ingrese una cantidad",
+        style: TextStyle(
+            color: Colors.red, fontSize: 18, fontWeight: FontWeight.bold),
+      );
+
+  Widget _btnCalcular(BuildContext context) {
     return ElevatedButton(
       onPressed: () {
-        metalPrice = double.parse(textController.text);
-        metalPrice = metalPrice * currentPrice;
-        final mySnackBar = SnackBar(
-          duration: const Duration(milliseconds: 5500),
-          content: Column(
-            children: [
-              const Text(
-                "Resultado Obtenido:",
-                style: TextStyle(color: Colors.green, fontSize: 21),
-              ),
-              const SizedBox(),
-              Text(metalPrice.toString())
-            ],
-          ),
-          action: SnackBarAction(
-            label: 'Cerrar',
-            onPressed: () {},
-            backgroundColor: Colors.orangeAccent,
-            textColor: Colors.black,
-          ),
-        );
-        ScaffoldMessenger.of(context).showSnackBar(mySnackBar);
+        try {
+          metalPrice = double.parse(textController.text);
+          metalPrice = metalPrice * currentPrice;
+          final mySnackBar =
+              _mySnackBar("Resultado Obtenido: $metalPrice", Colors.green);
+          ScaffoldMessenger.of(context).showSnackBar(mySnackBar);
+        } on FormatException {
+          final errorSnackbar =
+              _mySnackBar("Error al calcular el precio", Colors.red);
+          ScaffoldMessenger.of(context).showSnackBar(errorSnackbar);
+        }
       },
       child: const Text(
         "Calcular",
         style: TextStyle(
             fontSize: 22, fontWeight: FontWeight.bold, letterSpacing: 2),
+      ),
+    );
+  }
+
+  SnackBar _mySnackBar(String message, Color color) {
+    return SnackBar(
+      duration: const Duration(milliseconds: 5500),
+      content: Column(
+        children: [
+          Text(
+            message,
+            style: TextStyle(color: color, fontSize: 21),
+          ),
+        ],
+      ),
+      action: SnackBarAction(
+        label: 'Cerrar',
+        onPressed: () {},
+        backgroundColor: Colors.orangeAccent,
+        textColor: Colors.black,
       ),
     );
   }
