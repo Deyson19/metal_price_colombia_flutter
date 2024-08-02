@@ -53,7 +53,7 @@ class _MetalWidgetState extends State<MetalWidget> {
             ),
             Text('Precio: ${widget.metal.precioCompra}',
                 style: const TextStyle(color: Colors.black54,
-                fontSize: 16,
+                fontSize: 15,
                 fontWeight: FontWeight.bold
                 )),
             const SizedBox(
