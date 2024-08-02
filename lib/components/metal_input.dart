@@ -17,7 +17,6 @@ class _MetalInputState extends State<MetalInput> {
 
   @override
   void initState() {
-    currentPrice = widget.precioVenta;
     if (textController.value.text.isNotEmpty) {
       isValidQuantity = true;
     }
@@ -28,6 +27,8 @@ class _MetalInputState extends State<MetalInput> {
   void dispose() {
     textController.dispose();
     super.dispose();
+    metalPrice = 0;
+    currentPrice = 0;
   }
 
   @override
@@ -102,11 +103,14 @@ class _MetalInputState extends State<MetalInput> {
     return ElevatedButton(
       onPressed: () {
         try {
-          metalPrice = double.parse(textController.text);
-          metalPrice = metalPrice * currentPrice;
+          var price = double.parse(textController.text);
+          setState(() {
+            metalPrice = price * widget.precioVenta;
+          });
           final mySnackBar =
               _mySnackBar("Resultado Obtenido: $metalPrice", Colors.green);
           ScaffoldMessenger.of(context).showSnackBar(mySnackBar);
+          metalPrice = 0;
         } on FormatException {
           final errorSnackbar =
               _mySnackBar("Error al calcular el precio", Colors.red);
@@ -134,7 +138,9 @@ class _MetalInputState extends State<MetalInput> {
       ),
       action: SnackBarAction(
         label: 'Cerrar',
-        onPressed: () {},
+        onPressed: () {
+          ScaffoldMessenger.of(context).removeCurrentSnackBar();
+        },
         backgroundColor: Colors.orangeAccent,
         textColor: Colors.black,
       ),
