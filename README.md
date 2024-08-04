@@ -1,3 +1,3 @@
-# metal_price_colombia
+# Precio de Metales - Colombia
 
 A new Flutter project.
